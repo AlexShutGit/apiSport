@@ -11,19 +11,19 @@
                 <div class="table__title">Направление обучения</div>
                 <div class="table__title"></div>
             </div>
-            {% for student in students %}
-                {% set name = student.first_name ~ ' ' ~ student.second_name %}
+            {% for user in users %}
+                {% set name = user.first_name ~ ' ' ~ user.second_name %}
                 <div class="table__row">
-                    <div class="table__item">{{ student.id }}</div>
+                    <div class="table__item">{{ user.id }}</div>
                     <div class="table__item">{{ name }}</div>
-                    <div class="table__item">{{ student.direction }}</div>
+                    <div class="table__item">{{ user.direction }}</div>
                     <div class="table__item">
                         <button
                                 class="open-modal-button js-open-modal"
-                                data-birthday={{ student.birthday }}
-                                data-id="{{ student.id }}"
-                                data-first-name={{ student.first_name }}
-                                data-second-name={{ student.second_name }}
+                                data-birthday={{ user.birthday }}
+                                data-id="{{ user.id }}"
+                                data-first-name={{ user.first_name }}
+                                data-second-name={{ user.second_name }}
                         >
                             Дополнительная информация
                         </button>

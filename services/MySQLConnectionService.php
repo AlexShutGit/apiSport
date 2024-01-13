@@ -50,8 +50,8 @@ class MySQLConnectionService
     public static function getDataBaseService(
         string $host = 'localhost',
         string $user = 'root',
-        string $password = '',
-        string $database = 'livemaster.test'
+        string $password = 'root',
+        string $database = 'api_database'
     ): MySQLConnectionService
     {
         return new self(mysqli_connect($host, $user, $password, $database));

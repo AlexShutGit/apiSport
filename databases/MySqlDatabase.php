@@ -52,7 +52,7 @@ class MySqlDatabase implements DataBaseDefault
      * @param string $dataBase База данных
      * @return DataBaseDefault
      */
-    public static function getInstance(string $dataBase = 'livemaster.test'): DataBaseDefault
+    public static function getInstance(string $dataBase = 'api_database'): DataBaseDefault
     {
         if (!isset(self::$instances[$dataBase])) {
             self::$instances[$dataBase] = new self($dataBase);
@@ -66,12 +66,12 @@ class MySqlDatabase implements DataBaseDefault
      */
     public function fetchAll(string $query): array
     {
-        $data = $this->connection->query($query)->fetchAll();
+        $data = $this->connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
         if (!$data) {
             return [];
         }
-
+        
         return $data;
     }
 
@@ -80,7 +80,7 @@ class MySqlDatabase implements DataBaseDefault
      */
     public function fetchFirstItem(string $query): array
     {
-        return $this->connection->query($query)->fetch();
+        return $this->connection->query($query)->fetch(PDO::FETCH_ASSOC);
     }
 
     /**

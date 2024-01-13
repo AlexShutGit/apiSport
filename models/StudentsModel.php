@@ -4,7 +4,7 @@ namespace Models;
 
 use DataBases\MySqlDatabase;
 
-class StudentsModel extends BaseModel
+class usersModel extends BaseModel
 {
     /**
      * Отдает всех студентов по запросу
@@ -14,11 +14,11 @@ class StudentsModel extends BaseModel
      *
      * @return array
      */
-    public function getStudents(): array
+    public function getusers(): array
     {
-        $connection = $this->getConnection(MySqlDatabase::class, 'livemaster.test');
+        $connection = $this->getConnection(MySqlDatabase::class, 'api_database');
 
-        return $connection->fetchAll('SELECT id, first_name, second_name, direction, birthday FROM students');
+        return $connection->fetchAll('SELECT id, first_name, second_name, direction, birthday FROM users');
     }
 
     /**
@@ -30,10 +30,10 @@ class StudentsModel extends BaseModel
      * @param int $id Идентификатор студента
      * @return array
      */
-    public function getStudent(int $id): array
+    public function getuser(int $id): array
     {
-        $connection = $this->getConnection(MySqlDatabase::class, 'livemaster.test');
-        $query = 'SELECT id, first_name, second_name, direction, birthday FROM students WHERE id = ' . $id;
+        $connection = $this->getConnection(MySqlDatabase::class, 'api_database');
+        $query = 'SELECT id, first_name, second_name, direction, birthday FROM users WHERE id = ' . $id;
 
         return $connection->fetchFirstItem($query);
     }

@@ -2,7 +2,7 @@
 
 namespace Controllers;
 
-use Models\StudentsModel;
+use Models\UsersModel;
 
 class HomePageController extends BaseController
 {
@@ -16,10 +16,9 @@ class HomePageController extends BaseController
      */
     public function index(): string
     {
-        $model = new StudentsModel();
-        $resultData = $model->getStudents();
-
-        return $this->getView('homepage.twig', ['students' => $resultData]);
+        $model = new UsersModel();
+        $resultData = $model->getUsers();
+        return $this->getView(['users' => $resultData]);
     }
 
     /**
@@ -33,18 +32,18 @@ class HomePageController extends BaseController
      */
     public function getConcreteUser(array $data): string
     {
-        $id = (int) $data['id'];
+        $id = (int) $data['userId'];
         if (!$id) {
             return $this->redirectToNotFound();
         }
 
-        $studentModel = new StudentsModel();
-        $resultData = $studentModel->getStudent($id);
+        $userModel = new UsersModel();
+        $resultData = $userModel->getUser($id);
 
         if (!$resultData) {
             return $this->redirectToNotFound();
         }
 
-        return $this->getView('student.twig', ['student' => $resultData]);
+        return $this->getView(['user' => $resultData]);
     }
 }

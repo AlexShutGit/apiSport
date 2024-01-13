@@ -35,7 +35,9 @@ class AutoLoader
 	{
 		$explodedNamespace = explode('\\', $namespaceClass);
 		$className = array_pop($explodedNamespace);
-		$filePath = __DIR__ . '/' . strtolower(implode('/', $explodedNamespace)) . '/' . $className . '.php';
+		$preparedNamespace = strtolower(implode('/', $explodedNamespace));
+		$namespace = $preparedNamespace ? $preparedNamespace . '/' : $preparedNamespace;
+		$filePath = __DIR__ . '/' . $namespace . $className . '.php';
 
 		if ($filePath) {
 			require_once $filePath;

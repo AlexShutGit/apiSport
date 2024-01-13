@@ -29,7 +29,7 @@ services:
             - ./tmp/db:/var/lib/mysql
             - dbdata:/var/lib/mysql
         environment:
-            MYSQL_DATABASE: livemaster.test
+            MYSQL_DATABASE: api_database
             MYSQL_ROOT_PASSWORD: root
             MYSQL_USER: betauser
             MYSQL_PASSWORD: betauser
@@ -37,6 +37,14 @@ services:
             - 3306:3306
         command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
         container_name: database
+        
+    adminer:
+        image: adminer
+        container_name: db_adminer
+        environment:
+            ADMINER_DEFAULT_SERVER: database
+        ports:
+            - 8080:8080
 
 volumes:
     dbdata:

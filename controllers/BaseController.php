@@ -20,14 +20,11 @@ class BaseController
      * @param array $data Данные, которые надо передать в шаблон
      * @return string
      */
-    public function getView(string $viewPath = '', array $data = []): string
+    public function getView(array $data = []): string
     {
-        if (!$viewPath) {
-            return '';
-        }
-        global $twig;
-
-        return $twig->render($viewPath, $data);
+        //global $twig;
+        return json_encode($data, 256);
+        //return $twig->render($viewPath, $data);
     }
 
     /**
@@ -38,8 +35,8 @@ class BaseController
      *
      * @return string
      */
-    public function redirectToNotFound(): string
+    public function redirectToNotFound(array $data = ['message' => 'Что-то пошло не так :(']): string
     {
-        return (new NotFoundController())->index();
+        return json_encode($data, 256);
     }
 }

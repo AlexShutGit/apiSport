@@ -1,6 +1,6 @@
 <?php
 
-use Controllers\{HomePageController, NotFoundController};
+use Controllers\{HomePageController, NotFoundController, UsersController, WorkoutsController};
 
 class Router
 {
@@ -18,7 +18,15 @@ class Router
     /** Маршруты для проверки */
     const ROUTE_URLS = [
         '/' => [HomePageController::class, 'index'],
-        '/student/{id}/' => [HomePageController::class, 'getConcreteUser']
+        '/users/' => [UsersController::class, 'index'],
+        '/users/{userId}/' => [UsersController::class, 'getConcreteUser'],
+        '/users/{userId}{page}' => [UsersController:: class, 'getFavoritesWorkouts'],
+        '/users/addFavoriteWorkout/{userId}{workoutId}/' => [UsersController::class, 'addFavoriteWorkoutUser'],
+        '/users/deleteFavoriteWorkout/{userId}{workoutId}/' => [UsersController::class, 'deleteFavoriteWorkoutUser'],
+        '/users/{userId}{page}{keywords}' => [UsersController::class, 'searchFavoriteWorkout'],
+
+        '/workouts/{userId}{page}/' => [WorkoutsController::class, 'getWorkouts'],
+        '/workouts/{userId}{page}{keywords}/' => [WorkoutsController::class, 'search'],
     ];
 
     /**
@@ -32,12 +40,12 @@ class Router
     public function __construct(string $uri)
     {
         $parsedUri = $this->parseUriToSchema($uri);
-        [$this->controllerClass, $this->method] = $parsedUri;
-        if (isset($parsedUri['data']) && $parsedUri['data']) {
-            $this->data = $parsedUri['data'];
-        } else {
-            $this->data = [];
-        }
+        // [$this->controllerClass, $this->method] = $parsedUri;
+        // if (isset($parsedUri['data']) && $parsedUri['data']) {
+        //     $this->data = $parsedUri['data'];
+        // } else {
+        //     $this->data = [];
+        // }
     }
 
     /**
@@ -49,36 +57,58 @@ class Router
      * @param string $uri Проверяемый URI
      * @return array
      */
-    private function parseUriToSchema(string $uri): array
+    private function parseUriToSchema(string $uri)//: array
     {
-        if (!$uri) {
-            return [NotFoundController::class, 'index'];
+        switch ($_SERVER['REQUEST_METHOD']) {
+            case 'POST':
+                $post = json_decode(file_get_contents('php://input',true));
+                var_dump($post); 
+                break;
+            case 'GET':
+                $query = parse_url($_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], PHP_URL_QUERY);
+                parse_str($query,$result);
+                $parsedUri = array_merge([UsersController::class, 'getFavoritesWorkouts'], ['data' => $result]);
+                [$this->controllerClass, $this->method] = $parsedUri;
+                if (isset($parsedUri['data']) && $parsedUri['data']) {
+                    $this->data = $parsedUri['data'];
+                } else {
+                    $this->data = [];
+                }
+
+                break;
+            default:
+                # code...
+                break;
         }
 
-        if (!str_ends_with($uri, '/')) {
-            $uri .= '/';
-        }
+        // if (!$uri) {
+        //     return [NotFoundController::class, 'index'];
+        // }
 
-        foreach (self::ROUTE_URLS as $routePattern => $controllerData) {
-            if (!str_ends_with($routePattern, '/')) {
-                $routePattern .= '/';
-            }
+        // if (!str_ends_with($uri, '/')) {
+        //     $uri .= '/';
+        // }
 
-            $explodedUri = explode('/', $routePattern);
+        // foreach (self::ROUTE_URLS as $routePattern => $controllerData) {
+        //     if (!str_ends_with($routePattern, '/')) {
+        //         $routePattern .= '/';
+        //     }
 
-            $parsedExplodedUri = $this->getParsedExplodedUri($routePattern, (array) $explodedUri);
+        //     $explodedUri = explode('/', $routePattern);
 
-            $parsedUri = implode('\/', $parsedExplodedUri ?: $explodedUri);
-            $parsedUri = '/' . $parsedUri . '/ui';
+        //     $parsedExplodedUri = $this->getParsedExplodedUri($routePattern, (array) $explodedUri);
 
-            if (preg_match($parsedUri, $uri) && !preg_filter($parsedUri, '', $uri)) {
-                $varsFromUri = $this->getVarsFromUri($routePattern, $uri);
+        //     $parsedUri = implode('\/', $parsedExplodedUri ?: $explodedUri);
+        //     $parsedUri = '/' . $parsedUri . '/ui';
 
-                return array_merge($controllerData, ['data' => $varsFromUri]);
-            }
-        }
+        //     if (preg_match($parsedUri, $uri) && !preg_filter($parsedUri, '', $uri)) {
+        //         $varsFromUri = $this->getVarsFromUri($routePattern, $uri);
 
-        return [NotFoundController::class, 'index'];
+        //         return array_merge($controllerData, ['data' => $varsFromUri]);
+        //     }
+        // }
+
+        // return [NotFoundController::class, 'index'];
     }
 
     /**
