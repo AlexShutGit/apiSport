@@ -96,6 +96,15 @@ class MySqlDatabase implements DataBaseDefault
      */
     public function changeQuery(string $query): bool
     {
-        return true;
+        try {
+            $preparedQuery = $this->connection->prepare($query);
+        if($preparedQuery->execute()) {
+            return true;
+        }
+        return false;    
+        } catch (\Throwable $th) {
+            return false;
+        }
+        
     }
 }

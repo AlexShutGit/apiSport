@@ -37,8 +37,8 @@ class HomePageController extends BaseController
             return $this->redirectToNotFound();
         }
 
-        $userModel = new UsersModel();
-        $resultData = $userModel->getUser($id);
+        $model = new UsersModel();
+        $resultData = $model->getUser($id);
 
         if (!$resultData) {
             return $this->redirectToNotFound();

@@ -1,6 +1,6 @@
 <?php
 
-use Controllers\{HomePageController, NotFoundController, UsersController, WorkoutsController};
+use Controllers\{HomePageController, NotFoundController, SearchController, UsersController, WorkoutsController};
 
 class Router
 {
@@ -10,29 +10,33 @@ class Router
 	public $method;
 	/** @var array|string  */
 	public $data = [];
-
+    /** @var string HTTP метод GET  */
 	const METHOD_GET = 'GET';
+    /** @var string HTTP метод POST */
 	const METHOD_POST = 'POST';
+    /** @var string HTTP метод DELETE */
+	const METHOD_DELETE = 'DELETE';
 
 	/** Маршруты для проверки */
 	const ROUTE_URLS = [
 		'GET' => [
-			'/users' => [HomePageController::class, 'getConcreteUser'],
-			'/test/users' => [HomePageController::class, 'getConcreteUser'],
+            '/api/v1/user' => [UsersController::class, 'getUser'],
+			'/api/v1/user/troubles' => [UsersController::class, 'getTroubles'],
+            '/api/v1/user/FavoritesWorkouts' => [UsersController::class, 'getFavoritesWorkouts'],
+
+            '/api/v1/workouts' => [WorkoutsController::class, 'getWorkouts'],
+
+            '/api/v1/search/workouts' => [SearchController::class, 'search'],
 		],
 		'POST' => [
-			'/' => [HomePageController::class, 'index'],
+            '/api/v1/user/create' => [UsersController::class, 'createUser'],
+			'/api/v1/user/addFavoriteWorkout' => [UsersController::class, 'addFavoriteWorkoutUser'],
+			'/api/v1/user/registration' => [UsersController::class, 'registration'],
+			'/api/v1/user/authorization' => [UsersController::class, 'authorization'],
 		],
-		'/' => [HomePageController::class, 'index'],
-		'/users/' => [UsersController::class, 'index'],
-		'/users/{userId}/' => [UsersController::class, 'getConcreteUser'],
-		'/users/{userId}{page}' => [UsersController::class, 'getFavoritesWorkouts'],
-		'/users/addFavoriteWorkout/{userId}{workoutId}/' => [UsersController::class, 'addFavoriteWorkoutUser'],
-		'/users/deleteFavoriteWorkout/{userId}{workoutId}/' => [UsersController::class, 'deleteFavoriteWorkoutUser'],
-		'/users/{userId}{page}{keywords}' => [UsersController::class, 'searchFavoriteWorkout'],
-
-		'/workouts/{userId}{page}/' => [WorkoutsController::class, 'getWorkouts'],
-		'/workouts/{userId}{page}{keywords}/' => [WorkoutsController::class, 'search'],
+        'DELETE' => [
+            '/api/v1/user/deleteFavoriteWorkout' => [UsersController::class, 'deleteFavoriteWorkoutUser'],
+        ]
 	];
 
 	/**
@@ -42,10 +46,11 @@ class Router
 	 * @version 1.0, 08.10.2023
 	 *
 	 * @param string $uri Проверяемый URI
+     * @param string $method HTTP метод
 	 */
-	public function __construct(string $uri)
+	public function __construct(string $uri, string $method)
 	{
-		$parsedUri = $this->parseUriToSchema($uri);
+		$parsedUri = $this->parseUriToSchema($uri, $method);
 		[$this->controllerClass, $this->method] = $parsedUri;
 		if (isset($parsedUri['data']) && $parsedUri['data']) {
 			$this->data = $parsedUri['data'];
@@ -63,22 +68,13 @@ class Router
 	 * @param string $uri Проверяемый URI
 	 * @return array
 	 */
-	private function parseUriToSchema(string $uri): array
+	private function parseUriToSchema(string $uri, string $method): array
 	{
 		if (!$uri) {
 			return [NotFoundController::class, 'index'];
 		}
 
-		if (!str_ends_with($uri, '/')) {
-			$uri .= '/';
-		}
-
-		$requestMethod = $_SERVER['REQUEST_METHOD'];
-
-		foreach (self::ROUTE_URLS[$requestMethod] as $routePattern => $controllerData) {
-			if (!str_ends_with($routePattern, '/')) {
-				$routePattern .= '/';
-			}
+		foreach (self::ROUTE_URLS[$method] as $routePattern => $controllerData) {
 
 			$explodedUri = explode('/', $routePattern);
 			$parsedUri = implode('\/', $explodedUri);
@@ -86,7 +82,7 @@ class Router
 			$parsedUrl = parse_url($uri);
 
 			if (preg_match($parsedUri, $parsedUrl['path']) && !preg_filter($parsedUri, '', $parsedUrl['path'])) {
-				$data = $this->prepareData($requestMethod, $uri);
+				$data = $this->prepareData($method, $uri);
 
 				return array_merge($controllerData, ['data' => $data]);
 			}
@@ -104,13 +100,13 @@ class Router
 	 * @param string $uri Проверяемый URI
 	 * @return Router|null
 	 */
-	public static function getRouter(string $uri): ?Router
+	public static function getRouter(string $uri, string $method): ?Router
 	{
 		if (!$uri) {
 			return null;
 		}
 
-		return new self($uri);
+		return new self($uri, $method);
 	}
 
 	/**
@@ -133,6 +129,9 @@ class Router
 				return array_merge($postData, $output);
 			case self::METHOD_GET:
 				return $output;
+            case self::METHOD_DELETE:
+                $postData = json_decode(file_get_contents('php://input',true), true);
+				return array_merge($postData, $output);
 			default:
 				return [];
 		}

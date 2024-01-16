@@ -14,7 +14,7 @@ session_start();
     ->loadVendorCode()
     ->startupProjectConfig();
 
-$router = Router::getRouter($_SERVER['REQUEST_URI']);
+$router = Router::getRouter($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
 
 $content = (new CreateControllerService())->getMethodContent($router);
 CreateControllerService::printContent($content);

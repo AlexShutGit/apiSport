@@ -22,9 +22,7 @@ class BaseController
      */
     public function getView(array $data = []): string
     {
-        //global $twig;
         return json_encode($data, 256);
-        //return $twig->render($viewPath, $data);
     }
 
     /**

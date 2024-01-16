@@ -13,6 +13,6 @@ class NotFoundController extends BaseController
 
     public function index(): string
     {
-        return $this->getView('404.twig');
+        return $this->getView(['message' => '404']);
     }
 }

@@ -3,14 +3,13 @@
 namespace Controllers;
 
 use Models\UsersModel;
-use Models\usersModel as ModelsUsersModel;
 
 class UsersController extends BaseController
 {
     /**
      * Входная точка на главную страницу
      *
-     * @author Valery Shibaev
+     * @author Alexey Chuev
      * @version 1.0, 23.10.2023
      *
      * @return string
@@ -25,7 +24,7 @@ class UsersController extends BaseController
     /**
      * Отдает конкретного пользователя
      *
-     * @author Valery Shibaev
+     * @author Alexey Chuev
      * @version 1.0, 08.10.2023
      *
      * @param array $data Приходящие данные из uri
@@ -38,8 +37,8 @@ class UsersController extends BaseController
             return $this->redirectToNotFound();
         }
 
-        $userModel = new UsersModel();
-        $resultData = $userModel->getUser($id);
+        $model = new UsersModel();
+        $resultData = $model->getUser($id);
 
         if (!$resultData) {
             return $this->redirectToNotFound();
@@ -48,21 +47,80 @@ class UsersController extends BaseController
         return $this->getView(['user' => $resultData]);
     }
 
-    public function getFavoritesWorkouts(array $data): string
+     /**
+     * Отдает все проблемы
+     *
+     * @author Alexey Chuev
+     * @version 1.0, 08.10.2023
+     *
+     * @param array $data Приходящие данные из uri
+     * @return string
+     */
+    public function getTroubles(array $data): string
     {
-        $userId = (int) $data['user_id'];
-        $page = (int) $data['page'];
-        // var_dump($userId, $page);
-        if (!$userId || !$page) {
+        $model = new UsersModel();
+        $resultData = $model->getTroubles();
+
+        if (!$resultData) {
             return $this->redirectToNotFound();
         }
 
-        $userModel = new UsersModel();
-        $resultData = $userModel->getFavoritesWorkouts($userId, $page);
-        for ($i = 0; $i < count($resultData); $i++) {
-            $resultData[$i]['is_favorite']= true ;
+        return $this->getView(['troubles' => $resultData]);
+    }
+
+    /**
+     * Создает нового пользователя
+     *
+     * @author Chuev Alexey
+     * @version 1.0, 13.01.2024
+     *
+     * @param array $data Приходящие данные из uri
+     * @return string
+     */
+    public function createUser(array $data): string
+    {
+        $name = $data['name'];
+        $age = $data['age'];
+        $sex = $data['sex'];
+        $height = $data['height'];
+        $weight = $data['weight'];
+        if (!$name || !$age || !$sex || !$height || !$weight) {
+            return $this->redirectToNotFound(['message' => 'Заполните все поля']);
         }
-        
+
+        $model = new UsersModel();
+        $resultData = $model->createUser($name, $age, $sex, $height, $weight);
+
+        if (!$resultData) {
+            return $this->redirectToNotFound(['message' => 'Неизвестная ошибка создания пользователя']);
+        }
+
+        return $this->getView(['user' => $resultData]);
+    }
+
+    /**
+     * Получение избранных упражнений
+     *
+     * @author Chuev Alexey
+     * @version 1.0, 13.01.2024
+     *
+     * @param array $data Приходящие данные из uri
+     * @return string
+     */
+    public function getFavoritesWorkouts(array $data): string
+    {
+        $userId = (int) $data['userId'];
+        $page = (int) $data['page'];
+        if (!$userId || !$page) {
+            return $this->redirectToNotFound(['workouts' => []]);
+        }
+
+        $model = new UsersModel();
+        $resultData = $model->getFavoritesWorkouts($userId, $page);
+        for ($i = 0; $i < count($resultData); $i++) {
+            $resultData[$i]['is_favorite'] = true;
+        }
+
         if (!$resultData) {
             return $this->redirectToNotFound(['workouts' => []]);
         }
@@ -70,59 +128,116 @@ class UsersController extends BaseController
         return $this->getView(['workouts' => $resultData]);
     }
 
+    /**
+     * Добавляет в упражнение в избранные
+     *
+     * @author Chuev Alexey
+     * @version 1.0, 13.01.2024
+     *
+     * @param array $data Приходящие данные из uri
+     * @return string
+     */
     public function addFavoriteWorkoutUser(array $data): string
     {
         $userId = (int) $data['userId'];
         $workoutId = (int) $data['workoutId'];
-        if (!$userId || $workoutId) {
-            return $this->redirectToNotFound();
+        
+        if (!$userId || !$workoutId) {
+            return $this->redirectToNotFound(['value' => false]);
         }
 
-        $userModel = new UsersModel();
-        $resultData = $userModel->addFavoriteWorkout($userId, $workoutId);
+        $model = new UsersModel();
+        $resultData = $model->addFavoriteWorkout($userId, $workoutId);
 
         if (!$resultData) {
-            return $this->redirectToNotFound();
+            
+            return $this->redirectToNotFound(['value' => false]);
         }
 
-        return $this->getView(['workout' => $resultData]);
+        return $this->getView(['value' => true]);
     }
 
+    /**
+     * Удаляет упражнение из избранных
+     *
+     * @author Chuev Alexey
+     * @version 1.0, 13.01.2024
+     *
+     * @param array $data Приходящие данные из uri
+     * @return string
+     */
     public function deleteFavoriteWorkoutUser(array $data): string
     {
         $userId = (int) $data['userId'];
         $workoutId = (int) $data['workoutId'];
-        if (!$userId || $workoutId) {
-            return $this->redirectToNotFound();
+        if (!$userId || !$workoutId) {
+            return $this->redirectToNotFound(['value' => false]);
         }
 
-        $userModel = new UsersModel();
-        $resultData = $userModel->deleteFavoriteWorkout($userId, $workoutId);
+        $model = new UsersModel();
+        $resultData = $model->deleteFavoriteWorkout($userId, $workoutId);
 
         if (!$resultData) {
-            return $this->redirectToNotFound();
+            return $this->redirectToNotFound(['value' => false]);
         }
 
-        return $this->getView(['workout' => $resultData]);
+        return $this->getView(['value' => true]);
     }
 
-    public function searchFavoriteWorkout(array $data): string
+    /**
+     * Добавление пользователю логина и пароля
+     *
+     * @author Chuev Alexey
+     * @version 1.0, 13.01.2024
+     *
+     * @param array $data Приходящие данные из uri
+     * @return string
+     */
+    public function registration(array $data): string
     {
         $userId = (int) $data['userId'];
-        $keywords = (int) $data['keywords'];
-        $page = (int) $data['page'];
-
-        if (!$userId || $keywords || $page) {
-            return $this->redirectToNotFound();
+        $login = (string) $data['login'];
+        $password = (string) $data['password'];
+        
+        if (!$userId || !$login || !$password) {
+            return $this->redirectToNotFound(['value' => false]);
         }
 
-        $userModel = new UsersModel();
-        $resultData = $userModel->searchFavoritesWorkouts($userId, $page, $keywords);
+        $model = new UsersModel();
+        $resultData = $model->registation($userId, $login, $password);
+
+        if ($resultData['message']) {
+            return $this->redirectToNotFound($resultData);
+        }
+
+        return $this->getView(['value' => true]);
+    }
+
+    /**
+     * Авторизация пользователя
+     *
+     * @author Chuev Alexey
+     * @version 1.0, 13.01.2024
+     *
+     * @param array $data Приходящие данные из uri
+     * @return string
+     */
+    public function authorization(array $data): string
+    {
+        $login = (string) $data['login'];
+        $password = (string) $data['password'];
+        
+        if (!$login || !$password) {
+            return $this->redirectToNotFound(['user' => [`id` => 0]]);
+        }
+
+        $model = new UsersModel();
+        $resultData = $model->authorization($login, $password);
 
         if (!$resultData) {
-            return $this->redirectToNotFound();
+            return $this->redirectToNotFound(['value' => false]);
         }
 
-        return $this->getView(['workout' => $resultData]);
+        return $this->getView($resultData);
     }
 }
