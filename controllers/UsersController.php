@@ -84,12 +84,13 @@ class UsersController extends BaseController
         $sex = $data['sex'];
         $height = $data['height'];
         $weight = $data['weight'];
+        $troubles = $data['troubles'];
         if (!$name || !$age || !$sex || !$height || !$weight) {
             return $this->redirectToNotFound(['message' => 'Заполните все поля']);
         }
 
         $model = new UsersModel();
-        $resultData = $model->createUser($name, $age, $sex, $height, $weight);
+        $resultData = $model->createUser($name, $age, $sex, $height, $weight, $troubles);
 
         if (!$resultData) {
             return $this->redirectToNotFound(['message' => 'Неизвестная ошибка создания пользователя']);

@@ -18,7 +18,7 @@ class UsersModel extends BaseModel
     public function getUsers(): array
     {
         $connection = $this->getConnection(MySqlDatabase::class, 'api_database');
-        
+
         return $connection->fetchAll('SELECT id, name, sex, age, height, weight, BMI FROM users');
     }
 
@@ -70,7 +70,7 @@ class UsersModel extends BaseModel
      * @param array $troubles Идентификаторы проблем
      * @return array
      */
-    public function createUser(string $name, string $sex, int $age, float $height, float $weight, array $troubles)
+    public function createUser(string $name, string $sex, int $age, float $height, float $weight, $troubles)
     {
         $connection = $this->getConnection(MySqlDatabase::class, 'api_database');
 
@@ -81,15 +81,16 @@ class UsersModel extends BaseModel
         $queryId = 'SELECT * FROM users ORDER BY id DESC LIMIT 1';
         $userId = $connection->fetchFirstItem($queryId);
 
-        foreach ($troubles as $trouble) {
-            $queryAddTrouble = 'INSERT INTO users_troubles
-            SET user_id=' . $userId . 'trouble_id=' . $trouble;
+        if (!$troubles) {
+            foreach ($troubles as $trouble) {
+                $queryAddTrouble = 'INSERT INTO users_troubles
+                SET user_id=' . $userId . 'trouble_id=' . $trouble;
 
-            $connection->changeQuery($queryAddTrouble);
+                $connection->changeQuery($queryAddTrouble);
+            }
         }
-        
 
-        if($connection->changeQuery($queryCreate)){
+        if ($connection->changeQuery($queryCreate)) {
             return ['user' => $userId];
         }
 
@@ -106,12 +107,12 @@ class UsersModel extends BaseModel
      * @param int $page Страница пагинации
      * @return array
      */
-    public function getFavoritesWorkouts(int $userId, int $page) : array
+    public function getFavoritesWorkouts(int $userId, int $page): array
     {
         $recordsPerPage = 30;
-        $offset = ($page-1) * $recordsPerPage; 
-        $connection = $this->getConnection(MySqlDatabase::class, 'api_database');   
-        
+        $offset = ($page - 1) * $recordsPerPage;
+        $connection = $this->getConnection(MySqlDatabase::class, 'api_database');
+
         $query = 'SELECT w.id, w.name, w.description, w.image_url 
         FROM favorites_workouts fw 
         LEFT JOIN workouts w 
@@ -121,7 +122,7 @@ class UsersModel extends BaseModel
 
         return $connection->fetchAll($query);
     }
-    
+
     /**
      * Добавляет в избранные упражнение
      *
@@ -134,10 +135,10 @@ class UsersModel extends BaseModel
      */
     public function addFavoriteWorkout(int $userId, int $workoutId)
     {
-        $connection = $this->getConnection(MySqlDatabase::class, 'api_database');   
+        $connection = $this->getConnection(MySqlDatabase::class, 'api_database');
         $query = 'INSERT INTO
         favorites_workouts (`user_id`, `workout_id`)
-        VALUES(' . $userId . ', ' . $workoutId .')';
+        VALUES(' . $userId . ', ' . $workoutId . ')';
 
         return $connection->changeQuery($query);
     }
@@ -154,8 +155,8 @@ class UsersModel extends BaseModel
      */
     function deleteFavoriteWorkout(int $userId, int $workoutId)
     {
-        $connection = $this->getConnection(MySqlDatabase::class, 'api_database');   
-        $query = 'DELETE FROM favorites_workouts WHERE user_id=' . $userId . ' AND workout_id='. $workoutId;
+        $connection = $this->getConnection(MySqlDatabase::class, 'api_database');
+        $query = 'DELETE FROM favorites_workouts WHERE user_id=' . $userId . ' AND workout_id=' . $workoutId;
 
         return $connection->changeQuery($query);
     }
@@ -173,21 +174,21 @@ class UsersModel extends BaseModel
      */
     function registation(int $userId, string $login, string $password)
     {
-        $connection = $this->getConnection(MySqlDatabase::class, 'api_database');   
+        $connection = $this->getConnection(MySqlDatabase::class, 'api_database');
 
         $queryCheck = 'SELECT id FROM users WHERE login = "' . $login . '"';
         $queryRegistration = 'UPDATE users
         SET login = "' . $login . '", password = "' . $password . '"
         WHERE id = ' . $userId;
-        
+
         $isFree = (bool) $connection->fetchFirstItem($queryCheck);
 
-        if(!$isFree){
+        if (!$isFree) {
             $connection->changeQuery($queryRegistration);
         } else {
             return ['message' => 'Логин уже занят'];
         }
-        
+
         return ['message' => 'Неизвестная ошибка регистрации'];
     }
 
@@ -203,7 +204,7 @@ class UsersModel extends BaseModel
      */
     function authorization(string $login, string $password)
     {
-        $connection = $this->getConnection(MySqlDatabase::class, 'api_database'); 
+        $connection = $this->getConnection(MySqlDatabase::class, 'api_database');
 
         $query = 'SELECT id, name, sex, age, height, weight, BMI 
         FROM users 

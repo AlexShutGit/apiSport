@@ -22,7 +22,7 @@ class Router
 		'GET' => [
             '/api/v1/user' => [UsersController::class, 'getUser'],
 			'/api/v1/user/troubles' => [UsersController::class, 'getTroubles'],
-            '/api/v1/user/FavoritesWorkouts' => [UsersController::class, 'getFavoritesWorkouts'],
+            '/api/v1/user/favoritesWorkouts' => [UsersController::class, 'getFavoritesWorkouts'],
 
             '/api/v1/workouts' => [WorkoutsController::class, 'getWorkouts'],
 
