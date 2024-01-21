@@ -70,31 +70,33 @@ class UsersModel extends BaseModel
      * @param array $troubles Идентификаторы проблем
      * @return array
      */
-    public function createUser(string $name, string $sex, int $age, float $height, float $weight, $troubles)
+    public function createUser(string $name, string $sex, int $age, float $height, float $weight, array $troubles)
     {
         $connection = $this->getConnection(MySqlDatabase::class, 'api_database');
-
-        $BMI = $weight * ($height * $height);
+        
+        $height *=0.01;
+        $BMI = round($weight / ($height * $height), 1);
 
         $queryCreate = 'INSERT INTO users
-        SET name=:"' . $name . '", sex=:"' . $sex . '", age=:"' . $age . '", height=:"' . $height . '", weight=:"' . $weight . '", BMI=:"' . $BMI . '"';
-        $queryId = 'SELECT * FROM users ORDER BY id DESC LIMIT 1';
-        $userId = $connection->fetchFirstItem($queryId);
+        SET name="' . $name . '", sex="' . $sex . '", age=' . $age . ', height=' . $height . ', weight=' . $weight . ', BMI=' . $BMI;
+        $queryId = 'SELECT id FROM users ORDER BY id DESC LIMIT 1';
 
-        if (!$troubles) {
-            foreach ($troubles as $trouble) {
-                $queryAddTrouble = 'INSERT INTO users_troubles
-                SET user_id=' . $userId . 'trouble_id=' . $trouble;
+        if($connection->changeQuery($queryCreate)){
+            $userId = $connection->fetchFirstItem($queryId);
+            
+            if (!empty($troubles)) {
+                foreach ($troubles as $trouble) {
+                    $queryAddTrouble = 'INSERT INTO users_troubles
+                    SET user_id=' . $userId['id'] . ', trouble_id=' . $trouble;
 
-                $connection->changeQuery($queryAddTrouble);
+                    $connection->changeQuery($queryAddTrouble);
+                }
             }
+        } else {
+            return false;
         }
-
-        if ($connection->changeQuery($queryCreate)) {
-            return ['user' => $userId];
-        }
-
-        return false;
+         
+        return $userId['id'];
     }
 
     /**

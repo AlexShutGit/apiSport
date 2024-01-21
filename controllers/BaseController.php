@@ -33,8 +33,9 @@ class BaseController
      *
      * @return string
      */
-    public function redirectToNotFound(array $data = ['message' => 'Что-то пошло не так :(']): string
+    public function redirectToNotFound(array $data = ['title'=>'error', 'message' => 'Что-то пошло не так :(']): string
     {
+        http_response_code(400);
         return json_encode($data, 256);
     }
 }

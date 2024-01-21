@@ -34,14 +34,14 @@ class UsersController extends BaseController
     {
         $id = (int) $data['userId'];
         if (!$id) {
-            return $this->redirectToNotFound();
+            return $this->redirectToNotFound(['title' => 'error', 'message' => 'Ошибка при получении информации о пользователе']);
         }
 
         $model = new UsersModel();
         $resultData = $model->getUser($id);
 
         if (!$resultData) {
-            return $this->redirectToNotFound();
+            return $this->redirectToNotFound(['title' => 'error', 'message' => 'Пользователь не найден']);
         }
 
         return $this->getView(['user' => $resultData]);
@@ -62,7 +62,7 @@ class UsersController extends BaseController
         $resultData = $model->getTroubles();
 
         if (!$resultData) {
-            return $this->redirectToNotFound();
+            return $this->redirectToNotFound(['title' => 'error', 'message' => 'Проблемы не найдены']);
         }
 
         return $this->getView(['troubles' => $resultData]);
@@ -81,22 +81,22 @@ class UsersController extends BaseController
     {
         $name = $data['name'];
         $age = $data['age'];
-        $sex = $data['sex'];
+        $sex = $data['gender'];
         $height = $data['height'];
         $weight = $data['weight'];
         $troubles = $data['troubles'];
         if (!$name || !$age || !$sex || !$height || !$weight) {
-            return $this->redirectToNotFound(['message' => 'Заполните все поля']);
+            return $this->redirectToNotFound(['title' => 'error', 'message' => 'Заполните все поля']);
         }
 
         $model = new UsersModel();
-        $resultData = $model->createUser($name, $age, $sex, $height, $weight, $troubles);
+        $resultData = $model->createUser($name, $sex, $age, $height, $weight, $troubles);
 
         if (!$resultData) {
-            return $this->redirectToNotFound(['message' => 'Неизвестная ошибка создания пользователя']);
+            return $this->redirectToNotFound(['title' => 'error', 'message' => 'Неизвестная ошибка создания пользователя']);
         }
 
-        return $this->getView(['user' => $resultData]);
+        return $this->getView(['userId' => $resultData]);
     }
 
     /**

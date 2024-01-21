@@ -12,7 +12,8 @@ class WorkoutsModel extends BaseModel
      * @author Alexey Chuev
      * @version 1.0, 25.10.2023
      *
-     * @param int $id Идентификатор студента
+     * @param int $userId Идентификатор пользователя
+     * @param int $page Страница пагинации
      * @return array
      */
 

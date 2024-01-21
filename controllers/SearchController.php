@@ -37,7 +37,7 @@ class SearchController extends BaseController
             }
         }
         if (!$resultData) {
-            return $this->redirectToNotFound(['workouts' => []]);
+            return $this->redirectToNotFound(['title' => 'error', 'message' => 'Заполните все поля']);
         }
 
 

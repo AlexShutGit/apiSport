@@ -1,6 +1,6 @@
 <?php
 
-use Controllers\{HomePageController, NotFoundController, SearchController, UsersController, WorkoutsController};
+use Controllers\{HomePageController, NotFoundController, ProgramsController, SearchController, UsersController, WorkoutsController};
 
 class Router
 {
@@ -27,6 +27,8 @@ class Router
             '/api/v1/workouts' => [WorkoutsController::class, 'getWorkouts'],
 
             '/api/v1/search/workouts' => [SearchController::class, 'search'],
+
+			'/api/v1/programs/week' => [ProgramsController::class, 'getWeek'],
 		],
 		'POST' => [
             '/api/v1/user/create' => [UsersController::class, 'createUser'],
